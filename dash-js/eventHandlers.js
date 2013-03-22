@@ -1,7 +1,7 @@
 /*
  * eventHandlers.js
  *****************************************************************************
- * Copyright (C) 2012 - 2013 Alpen-Adria-Universität Klagenfurt
+ * Copyright (C) 2012 - 2013 Alpen-Adria-Universitï¿½t Klagenfurt
  *
  * Created on: Feb 13, 2012
  * Authors: Benjamin Rainer <benjamin.rainer@itec.aau.at>
@@ -26,7 +26,9 @@
  function onOpenSource(e)
  {
 	_dashSourceOpen(overlayBuffer, adaptation.currentRepresentation, dashPlayer.videoTag, e.target);
-	overlayBuffer.bufferStateListener(overlayBuffer);
+	// overlayBuffer.bufferStateListener(overlayBuffer);
+    window.setTimeout(function () {overlayBuffer.bufferStateListener(overlayBuffer);},2000);
+
  }
  
  function onProgress(e)

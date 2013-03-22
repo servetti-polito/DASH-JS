@@ -1,7 +1,7 @@
 /*
  * adaptationlogic.js
  *****************************************************************************
- * Copyright (C) 2012 - 2013 Alpen-Adria-Universität Klagenfurt
+ * Copyright (C) 2012 - 2013 Alpen-Adria-Universitï¿½t Klagenfurt
  *
  * Created on: Feb 13, 2012
  * Authors: Benjamin Rainer <benjamin.rainer@itec.aau.at>
@@ -78,17 +78,38 @@ adaptationLogic.prototype.notify = function() {
 
 adaptationLogic.prototype._getNextChunk = function (count){
 
-	return this.currentRepresentation.segmentList.segment[count];
+    var segmentURL = {};
+
+    if(this.currentRepresentation.segmentList) {
+	    segmentURL = this.currentRepresentation.segmentList.segment[count];
+    } else if (this.currentRepresentation.segmentTemplate) {
+        segmentURL.src = this.currentRepresentation.segmentTemplate.media.replace("$Number%03$", count);
+    }
+
+    return segmentURL;
 }
 
 adaptationLogic.prototype.getInitialChunk = function(presentation)
 {
-	return presentation.initializationSegment;
+    var segmentURL = {};
+    if(presentation.segmentTemplate) {
+        segmentURL.src = presentation.segmentTemplate.initialization;
+    } else {
+        segmentURL = presentation.initializationSegment;
+    }
+
+    return segmentURL;
 }
 
-adaptationLogic.prototype._getNextChunkP = function (presentation, count){
-
-	return presentation.segmentList.segment[count];
+adaptationLogic.prototype._getNextChunkP = function (presentation, count)
+{
+    var segmentURL = {};
+    if(presentation.segmentList) {
+	    segmentURL = presentation.segmentList.segment[count];
+    } else if (presentation.segmentTemplate) {
+        segmentURL.src = presentation.segmentTemplate.media.replace("$Number%03$", count);
+    }
+    return segmentURL;
 }
 
 function init_rateBasedAdaptation(_mpd, video,bandwidth)

@@ -1,7 +1,7 @@
 /*
  * DASHttp.js
  *****************************************************************************
- * Copyright (C) 2012 - 2013 Alpen-Adria-Universität Klagenfurt
+ * Copyright (C) 2012 - 2013 Alpen-Adria-Universitï¿½t Klagenfurt
  *
  * Created on: Feb 13, 2012
  * Authors: Benjamin Rainer <benjamin.rainer@itec.aau.at>
@@ -66,10 +66,15 @@ function _fetch_segment(presentation, url, video, range, buffer)
     			    adaptation.switchRepresentation();
     			    
 			    _push_segment_to_media_source_api(buffer, data);
-    			    
-			    if(presentation.curSegment >= presentation.segmentList.segments-1) video.webkitSourceEndOfStream(HTMLMediaElement.EOS_NO_ERROR);
-        
-   		 };
+
+                /* FIXME: in the live case we need an heuristic because the last segment is not known */
+                if(presentation.segmentList) {
+                    if(presentation.curSegment >= presentation.segmentList.segments-1)
+                        video.webkitSourceEndOfStream(HTMLMediaElement.EOS_NO_ERROR);
+                }
+                presentation.curSegment++;
+
+            };
 	
 	beginBitrateMeasurementByID(this._timeID);
 	_timeID++;
@@ -95,7 +100,12 @@ function _fetch_segment_for_buffer(presentation, url, video, range, buffer)
 	//_tmpvideo = video;
 	xhr.onload = function(e)
 	{
-		
+		if(xhr.status == 404) {
+            //TODO-LIVE segNotAvailable = true;
+            //TODO-LIVE requestDate = new Date();
+
+        } else {
+
 		data = new Uint8Array(this.response);
 		mybps = endBitrateMeasurementByID(this.timeID,data.length);
 		myBandwidth.calcWeightedBandwidth(parseInt(mybps));
@@ -104,10 +114,15 @@ function _fetch_segment_for_buffer(presentation, url, video, range, buffer)
         
      		   // push the data into our buffer
        		buffer.push(data, 2);
-        
-        	if(presentation.curSegment >= presentation.segmentList.segments-1) buffer.streamEnded = true;
-        
-       		buffer.callback();
+
+            /* FIXME: in the live case we need an heuristic because the last segment is not known */
+            if(presentation.segmentList) {
+                if(presentation.curSegment >= presentation.segmentList.segments-1) buffer.streamEnded = true;
+            }
+            presentation.curSegment++;
+
+            buffer.callback();
+        }
 		
 	};
 	
@@ -137,8 +152,7 @@ function _dashSourceOpen(buffer, presentation, video, mediaSource)
 		_fetch_segment(presentation, (baseURL != 'undefined' ? presentation.baseURL : '') + adaptation._getNextChunkP(presentation, presentation.curSegment).src, video, adaptation._getNextChunk(presentation.curSegment).range, buffer);
 	
 		if(presentation.curSegment > 0 ) presentation.curSegment = 1;
-		presentation.curSegment++;
-				
+
 	}else{
 		baseURL = presentation.baseURL;
 		_fetch_segment(presentation, (baseURL != 'undefined' ? presentation.baseURL : '') + adaptation.getInitialChunk(presentation).src, video, adaptation.getInitialChunk(presentation).range, buffer);
@@ -150,13 +164,21 @@ function _dashSourceOpen(buffer, presentation, video, mediaSource)
 
 function _dashFetchSegmentBuffer(presentation, video, buffer)
 {
-	if(presentation.curSegment >= presentation.segmentList.segments-1) {
-        return; 
+    /* FIXME: in the live case use heuristic */
+    if(presentation.segmentList) {
+        if (presentation.curSegment >= presentation.segmentList.segments - 1) {
+            return;
+        }
     }
     baseURL = presentation.baseURL;
-	_fetch_segment_for_buffer(presentation, (baseURL != 'undefined' ? presentation.baseURL : '') + adaptation._getNextChunkP(presentation, presentation.curSegment).src, video, adaptation._getNextChunk(presentation.curSegment).range, buffer);
-	presentation.curSegment++;
-	
+
+	_fetch_segment_for_buffer(  presentation,
+                                (baseURL != 'undefined' ? presentation.baseURL : '') +
+                                    adaptation._getNextChunkP(presentation, presentation.curSegment).src,
+                                video, adaptation._getNextChunk(presentation.curSegment).range,
+                                buffer);
+
+
 }
 
 

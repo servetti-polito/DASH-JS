@@ -12,9 +12,6 @@ function updatePlaybackTime()
 function DASH_MPD_loaded()
 {
 
-	
-
-
 	myBandwidth = new bandwidth(bps, 1.1, 0.9);
    
 	adaptation = init_rateBasedAdaptation(dashInstance.mpdLoader.mpdparser.pmpd, dashInstance.videoTag, myBandwidth);
@@ -68,5 +65,14 @@ function DASHPlayer(videoTag, URLtoMPD)
 	this.mpdLoader.loadMPD(URLtoMPD);
 	//myBuffer = init_timeBuffer(2,10,0,video);
 	//video.addEventListener('progress', , false);
+}
+
+function checkDate(str_startTime) {
+    var startTime = new Date(str_startTime).getTime();
+    var nowTime = new Date().getTime();
+
+    if (nowTime <= startTime) { return -1; }
+    else { return Math.floor((nowTime-startTime)/1000); }
+
 }
 

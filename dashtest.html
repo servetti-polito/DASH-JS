@@ -22,6 +22,12 @@
 	<h1> DASH-JS Showcase</h1>
 	This showcase will only work using Google Chrome with MediaSource API enabled (use chrome://flags to enable the API). 
 <p>
+    <div>
+        <label>mpd</label>
+        <input type="text" name="mpd" id="mpd"/>
+        <input type="submit" value="load" onclick='loadmpd();'/><br/>
+        <div>(e.g. http://www-itec.uni-klu.ac.at/dash/js/content/bunny_ibmff_360.mpd, http://streaming.polito.it/dash-js-live/output/livestream.mpd)</div>
+    </div>
     <br>
         Bandwidth in kbps (0=infinite[estimated]): <input type="text" id="bps" value="0"> <input type="button" value="Set" onClick="javascript:setBandwidth()"></p>
 	<p>
@@ -37,11 +43,14 @@
                 maxBandwidth = mybps;
                 
             }
+        function loadmpd() {
+            video = document.querySelector("video");
+            dashPlayer = new DASHPlayer(video,document.getElementById("mpd").value);
+        }
 		
 		 
-		
-		video = document.querySelector('video');
-		var dashPlayer = new DASHPlayer(video,"http://localhost/dash/bigbuckbunny_mp.mpd");
+
+
 		
 	
 		

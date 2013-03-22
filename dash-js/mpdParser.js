@@ -1,7 +1,7 @@
 /*
  * mpdParser.js
  *****************************************************************************
- * Copyright (C) 2012 - 2013 Alpen-Adria-Universität Klagenfurt
+ * Copyright (C) 2012 - 2013 Alpen-Adria-Universitï¿½t Klagenfurt
  *
  * Created on: Feb 13, 2012
  * Authors: Benjamin Rainer <benjamin.rainer@itec.aau.at>
@@ -28,6 +28,7 @@ MPD.rootElement.profile = "profiles";
 MPD.rootElement.type = "type";
 MPD.rootElement.mediaPresentationDuration = "mediaPresentationDuration";
 MPD.rootElement.minBufferTime = "minBufferTime";
+MPD.rootElement.availabilityStartTime = "availabilityStartTime";
 MPD.baseURL = new Object();
 MPD.baseURL.name = "BaseURL";
 MPD.period = new Object();
@@ -58,6 +59,14 @@ MPD.segmentURL = new Object();
 MPD.segmentURL.name = "SegmentURL";
 MPD.segmentURL.src = "media";
 MPD.segmentURL.range = "mediaRange";
+
+MPD.segmentTemplate = new Object();
+MPD.segmentTemplate.name = "SegmentTemplate";
+MPD.segmentTemplate.timescale = "timescale";
+MPD.segmentTemplate.initialization = "initialization";
+MPD.segmentTemplate.media = "media";
+MPD.segmentTemplate.duration = "duration";
+MPD.segmentTemplate.startNumber = "startNumber";
 
 function objectSize(obj)
 {
@@ -201,7 +210,6 @@ MPDParser.prototype.parseSegmentList = function(representations, periods, groups
 	this.pmpd.period[periods].group[groups].representation[representations].segmentList.segment = new Array();
 	for(s=0;s<segmentListChilds.length; s++)
 	{
-	
 		if(segmentListChilds.item(s).nodeName == MPD.segmentURL.name)
 		{
 			node = segmentListChilds.item(s);
@@ -220,6 +228,27 @@ MPDParser.prototype.parseSegmentList = function(representations, periods, groups
 	this.pmpd.period[periods].group[groups].representation[representations].segmentList.segments = segments;
 
 }
+
+
+MPDParser.prototype.parseSegmentTemplate = function(representations, periods, groups, node)
+{
+    // console.log('Found a new segmentTemplate...');
+    var attribs = objectSize(MPD.segmentTemplate);
+
+    for(i=1; i<attribs; i++)
+    {
+        attribValue = eval("MPD.segmentTemplate."+getKeyByIndex(MPD.segmentTemplate,i).toString());
+        if(node.hasAttribute(attribValue))
+            eval("this.pmpd.period[periods].group[groups].representation[representations].segmentTemplate." + getKeyByIndex(MPD.segmentTemplate,i).toString() + "= node.attributes.getNamedItem(attribValue).value");
+        //console.log("pmpd.period["+periods+"].group["+groups+"]." + getKeyByIndex(MPD.group,i).toString() + "=" + eval("this.pmpd.period[periods].groups[groups]" + getKeyByIndex(MPD.group,i).toString()));
+    }
+    //this.pmpd.period[periods].group[groups].representation[representations].segmentTemplate
+
+    //richiamo il metodo per parsificare l'availabilityStartTime
+    this.parseAvailabilityStartTime(this.pmpd.availabilityStartTime);
+
+}
+
 
 MPDParser.prototype.parseRepresentation = function(representations, periods, groups, node)
 {
@@ -265,10 +294,20 @@ MPDParser.prototype.parseRepresentation = function(representations, periods, gro
 				this.pmpd.period[periods].group[groups].representation[representations].baseURL = node.textContent;
 			
 			}
-		
-		}	
+
+            if(repNode.nodeName == MPD.segmentTemplate.name)
+            {
+                this.pmpd.period[periods].group[groups].representation[representations].segmentTemplate = new Object();
+                // FIXME: needs to be checked
+                this.pmpd.period[periods].group[groups].representation[representations].hasInitialSegment = true;
+                this.parseSegmentTemplate(representations,groups, periods, repNode);
+
+            }
+
+        }
 	}
 }
+
 
 MPDParser.prototype.parseGroup = function(periods, groups, node)
 {
@@ -302,8 +341,17 @@ MPDParser.prototype.parseGroup = function(periods, groups, node)
 				representations++;
 			
 			}
-		
-		}	
+
+            if(groupNode.nodeName == MPD.segmentTemplate.name)
+            {
+                this.pmpd.period[periods].group[groups].segmentTemplate = new Object();
+
+                this.parseSegmentTemplate(representations,groups, periods, groupNode);
+
+            }
+
+
+        }
 	}
 
 }
@@ -426,8 +474,15 @@ MPDLoader.prototype.loadMPD = function(mpdURL)
 	this.xmlHttp.send( null );
 			
 	beginBitrateMeasurement();
-}		
+}
 
+/* FIXME: what is for if does not export results? */
+MPDParser.prototype.parseAvailabilityStartTime = function (str_startTime) {
+    var startTime = new Date(str_startTime).getTime();
+    var nowTime = new Date().getTime();
 
+    if (nowTime <= startTime) { return -1; }
+    else { return Math.floor((nowTime-startTime)/1000); }
 
+}
 		
