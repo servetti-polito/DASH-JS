@@ -1,5 +1,8 @@
 var DASHJS_VERSION = "0.5a";
 var dashInstance;
+
+/* was PLOT
+
 var playbackTimePlot;
 
 function updatePlaybackTime()
@@ -9,6 +12,8 @@ function updatePlaybackTime()
     
 }
 
+*/
+
 function DASH_MPD_loaded()
 {
 
@@ -16,7 +21,8 @@ function DASH_MPD_loaded()
    
 	adaptation = init_rateBasedAdaptation(dashInstance.mpdLoader.mpdparser.pmpd, dashInstance.videoTag, myBandwidth);
 	
-   	myFplot = new fPlot(document.getElementById("graph").getContext("2d"),parsePT(dashInstance.mpdLoader.mpdparser.pmpd.mediaPresentationDuration),document.getElementById("graph").width,document.getElementById("graph").height);
+   	/* was for PLOT: 
+	myFplot = new fPlot(document.getElementById("graph").getContext("2d"),parsePT(dashInstance.mpdLoader.mpdparser.pmpd.mediaPresentationDuration),document.getElementById("graph").width,document.getElementById("graph").height);
  	myFplot.initNewFunction(0);
 	myFplot.initNewFunction(1);
     	myFplot.initNewFunction(2); // the current playback time
@@ -24,6 +30,7 @@ function DASH_MPD_loaded()
 	myBandwidth.addObserver(myFplot);
 	
 	adaptation.addObserver(myFplot);
+	*/
 	adaptation.switchRepresentation(); // try to get a better representation at the beginning
 	
 	overlayBuffer = init_mediaSourceBuffer("0", 0,2,0,dashInstance.videoTag);
@@ -50,7 +57,7 @@ function DASH_MPD_loaded()
 	overlayBuffer.addEventHandler(function(fillpercent, fillinsecs, max){ console.log("Event got called from overlay buffer, fillstate(%) = " + fillpercent + ", fillstate(s) = " + fillinsecs + ", max(s) = " + max); });
     
 
-   	window.setTimeout(function () { updatePlaybackTime(); },100);
+   	// was for PLOT: window.setTimeout(function () { updatePlaybackTime(); },100);
 
     
 }
