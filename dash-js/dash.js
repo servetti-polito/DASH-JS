@@ -1,6 +1,14 @@
 var DASHJS_VERSION = "0.5a";
 var dashInstance;
 
+console.logCopy = console.log.bind(console);
+
+console.log = function(data)
+{
+    var timestamp = '[' + Date.now()/1000 + '] ';
+    this.logCopy(timestamp, data);
+};
+
 /* was PLOT
 
 var playbackTimePlot;

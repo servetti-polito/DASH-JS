@@ -48,7 +48,7 @@ function adaptationLogic(_mpd, video)
 	
 	// CHANGE: if isoff-live profile detected, seek to current segment
 	if(_mpd.profile == "urn:mpeg:dash:profile:isoff-live:2011" && this.currentRepresentation.segmentTemplate) {
-		var s = Math.max(this.parseAvailabilityStartTime(_mpd.availabilityStartTime)-1, 0);
+		var s = Math.max(this.parseAvailabilityStartTime(_mpd.availabilityStartTime)-2, 0);
 		this.currentRepresentation.curSegment =  Math.floor(s / this.currentRepresentation.segmentTemplate.duration);
 		console.log("[live] stream started at " + _mpd.availabilityStartTime + " now reached segment n. " + s);
 	} else {
