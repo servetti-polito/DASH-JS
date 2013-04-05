@@ -45,7 +45,16 @@ function adaptationLogic(_mpd, video)
 	this.currentRepresentation = _mpd.period[0].group[0].representation[m];
 	if(this.currentRepresentation.baseURL == false) this.currentRepresentation.baseURL = _mpd.baseURL;
 	if(this.lowestRepresentation.baseURL == false) this.lowestRepresentation.baseURL = _mpd.baseURL;
-	this.currentRepresentation.curSegment = 0;
+	
+	// CHANGE: if isoff-live profile detected, seek to current segment
+	if(_mpd.profile == "urn:mpeg:dash:profile:isoff-live:2011" && this.currentRepresentation.segmentTemplate) {
+		var s = Math.max(this.parseAvailabilityStartTime(_mpd.availabilityStartTime), 0);
+		this.currentRepresentation.curSegment =  Math.floor(s / this.currentRepresentation.segmentTemplate.duration);
+		console.log("[live] stream started at " + _mpd.availabilityStartTime + " now reached segment n. " + s);
+	} else {
+		this.currentRepresentation.curSegment = 0;
+	}
+
 	this.resolutionSwitch = 0;
 	this.mediaElement = video;
 	
@@ -164,4 +173,13 @@ function init_rateBasedAdaptation(_mpd, video,bandwidth)
 	ratebased = new rateBasedAdaptation(bandwidth);
 	
 	return ratebased;
+}
+
+adaptationLogic.prototype.parseAvailabilityStartTime = function (str_startTime) {
+    var startTime = new Date(str_startTime).getTime();
+    var nowTime = new Date().getTime();
+
+    if (nowTime <= startTime) { return -1; }
+    else { return Math.floor((nowTime-startTime)/1000); }
+
 }
