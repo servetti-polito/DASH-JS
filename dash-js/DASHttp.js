@@ -84,7 +84,7 @@ function _fetch_segment(presentation, url, video, range, buffer)
 
 function _fetch_segment_for_buffer(presentation, url, video, range, buffer)
 {
-    console.log('DASH JS Client fetching segment: ' + url);
+    console.log('DASH JS Client fetching segment for buffer: ' + url);
 	var xhr = new XMLHttpRequest();
 	xhr.timeID = _timeID;
 	xhr.open('GET', url, true);

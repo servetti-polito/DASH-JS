@@ -26,7 +26,7 @@ function DASH_MPD_loaded()
 	adaptation.addObserver(myFplot);
 	adaptation.switchRepresentation(); // try to get a better representation at the beginning
 	
-	overlayBuffer = init_mediaSourceBuffer("0", 20,30,0,dashInstance.videoTag);
+	overlayBuffer = init_mediaSourceBuffer("0", 0,2,0,dashInstance.videoTag);
 	dashInstance.overlayBuffer = overlayBuffer;
  	
     /* new MSE ... */
