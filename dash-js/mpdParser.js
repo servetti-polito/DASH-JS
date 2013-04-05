@@ -291,8 +291,16 @@ MPDParser.prototype.parseRepresentation = function(representations, periods, gro
 			
 			if(repNode.nodeName == MPD.baseURL.name)
 			{
-				this.pmpd.period[periods].group[groups].representation[representations].baseURL = node.textContent;
-			
+				// this.pmpd.period[periods].group[groups].representation[representations].baseURL = node.textContent;
+				// CHANGED: moved relative urls to the base location of the MPD file
+				if (/^(f|ht)tps?:\/\//i.test(node.textContent)) {
+					// Absolute URL: do nothing
+					this.pmpd.period[periods].group[groups].representation[representations].baseURL = node.textContent;
+					console.debug("[live] absolute baseURL, do nothing");
+				} else {
+					this.pmpd.period[periods].group[groups].representation[representations].baseURL = this.baseMpdUrl + node.textContent;
+					console.debug("[live] relative baseURL, prepend " + this.baseMpdUrl);
+				}
 			}
 
             if(repNode.nodeName == MPD.segmentTemplate.name)
@@ -422,8 +430,18 @@ MPDParser.prototype.parse = function()
 				if(node.nodeName == MPD.baseURL.name)
 				{
 					// we won't expect any attributes with the <BaseURL>...</BaseURL>
-					this.pmpd.baseURL = node.textContent;
-					console.log(this.pmpd.baseURL);
+					//this.pmpd.baseURL = node.textContent;
+                                // CHANGED: moved relative urls to the base location of the MPD file
+                                if (/^(f|ht)tps?:\/\//i.test(node.textContent)) {
+                                        // Absolute URL: do nothing
+                                        this.pmpd.baseURL = node.textContent;
+                                        console.debug("[live] absolute baseURL, do nothing");
+                                } else {
+                                        this.pmpd.baseURL = this.baseMpdUrl + node.textContent;
+                                        console.debug("[live] relative baseURL, prepend " + this.baseMpdUrl);
+                                }
+
+					//console.log(this.pmpd.baseURL);
 				}
 						
 				if(node.nodeName == MPD.period.name)
@@ -459,6 +477,7 @@ MPDLoader.prototype._loadMPD = function()
 	bps = endBitrateMeasurement(instance.xmlHttp.responseText.length);
 	console.log("Bitrate:" + bps + " bps");
 	instance.mpdparser = new MPDParser(instance.xmlHttp.responseText);
+	instance.mpdparser.baseMpdUrl = instance.baseMpdUrl;
 	instance.mpdparser.parse();
 	instance.callback();
 }
@@ -467,6 +486,7 @@ MPDLoader.prototype.loadMPD = function(mpdURL)
 {
 	console.log(mpdURL);
 	instance = this;
+	instance.baseMpdUrl = mpdURL.substring(0, mpdURL.lastIndexOf("/")+1);
 	this.xmlHttp = new XMLHttpRequest(); 
 	this.xmlHttp.onreadystatechange = this._loadMPD;
 	this.xmlHttp.open( "GET", mpdURL, true );	
