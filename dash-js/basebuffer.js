@@ -47,6 +47,7 @@ function baseBuffer()
 	// buffer array, ring buffer ...
 	this.buffer = new Object;
 	this.buffer.array = new Array();
+	this.buffer.sideinfo = new Array();
 	this.buffer.first = 0;
 	this.buffer.last = 0;
 	this.buffer.size = 0;
@@ -81,6 +82,9 @@ baseBuffer.prototype.callEvent = function(event,data)
 	}
 }
 
+baseBuffer.prototype.drainTimeOffset = function(dimension,amount) {
+    return this.getTimeOffset();
+}
 
 baseBuffer.prototype.drain = function(dimension,amount)
 {
@@ -136,11 +140,14 @@ baseBuffer.prototype.state = function(dimension) {	//return buffer fill level in
 	
 }
 
-baseBuffer.prototype.add = function(data)
+baseBuffer.prototype.add = function(data, timeOffset)
 {
 	console.log("Adding chunk: " + this.buffer.last % this.buffer.size);
 	console.log("Fill state: " + this.fillState.seconds);
-	this.buffer.array[this.buffer.last++ % this.buffer.size] = data
+	// If a timeOffset is passed, save also the timeOffset info in the sideinfo array
+	if(timeOffset) this.buffer.sideinfo[this.buffer.last % this.buffer.size] = timeOffset;
+	this.buffer.array[this.buffer.last % this.buffer.size] = data
+	this.buffer.last++;
 }
 
 baseBuffer.prototype.get = function()
@@ -148,4 +155,14 @@ baseBuffer.prototype.get = function()
 	console.log("Getting chunk: " + this.buffer.first % this.buffer.size);
 	console.log("Fill state: " + this.fillState.seconds);
 	return this.buffer.array[this.buffer.first++ % this.buffer.size];
+}
+
+baseBuffer.prototype.getTimeOffset = function()
+{
+    console.log("[live] Getting sideinfo for chunk: " + (this.buffer.first-1) % this.buffer.size + 
+		" timeOffset: " + this.buffer.sideinfo[(this.buffer.first-1) % this.buffer.size]);
+    // FIXME: -1 required because we need the info of the last extracted chunk
+    var to = this.buffer.sideinfo[(this.buffer.first-1) % this.buffer.size];
+    if(to && to<0) return to;
+    else return 0;
 }

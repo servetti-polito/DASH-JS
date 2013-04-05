@@ -34,11 +34,12 @@ function DASHttp()
 
 
 // this method is used by the mediaSourceBuffer to push segments in
-function _push_segment_to_media_source_api(buffer, data)
+function _push_segment_to_media_source_api(buffer, data, to)
 {
     console.log("DASH-JS client: appending data of length: " + data.length + " to the Media Source Buffer with id: "+ buffer.id);
-    sourceBufferAppend(dashPlayer.MSE, buffer.id, data);
-   
+    // If we get the time offset, pass it to align the mediasource
+    if(to) sourceBufferAppend(dashPlayer.MSE, buffer.id, data, to);
+    else sourceBufferAppend(dashPlayer.MSE, buffer.id, data);
 }
 
 function _fetch_segment(presentation, url, video, range, buffer)
@@ -72,7 +73,7 @@ function _fetch_segment(presentation, url, video, range, buffer)
                     if(presentation.curSegment >= presentation.segmentList.segments-1)
                         video.webkitSourceEndOfStream(HTMLMediaElement.EOS_NO_ERROR);
                 }
-                presentation.curSegment++;
+                //presentation.curSegment++;
 
             };
 	
@@ -84,7 +85,7 @@ function _fetch_segment(presentation, url, video, range, buffer)
 
 function _fetch_segment_for_buffer(presentation, url, video, range, buffer)
 {
-    console.log('DASH JS Client fetching segment: ' + url);
+    console.log('DASH JS Client fetching segment for buffer: ' + url);
 	var xhr = new XMLHttpRequest();
 	xhr.timeID = _timeID;
 	xhr.open('GET', url, true);
@@ -112,8 +113,11 @@ function _fetch_segment_for_buffer(presentation, url, video, range, buffer)
         
 		adaptation.switchRepresentation();      // <--- mod this, if you wanna change the adaptation behavior ... (e. g., include buffer state, ...)
         
-     		   // push the data into our buffer
-       		buffer.push(data, 2);
+		// push the data into our buffer
+		// CHANGED: save also the segment timestamp
+		if(presentation.curSegment!=0) buffer.push(data, 2, -(presentation.curSegment-1)*2);
+		else buffer.push(data, 2, 0);
+       		// buffer.push(data, 2);
 
             /* FIXME: in the live case we need an heuristic because the last segment is not known */
             if(presentation.segmentList) {

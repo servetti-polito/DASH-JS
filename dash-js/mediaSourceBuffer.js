@@ -77,14 +77,21 @@ function init_mediaSourceBuffer(bufferId, criticalLevel,buffersize, mediaAPI, vi
                 return;
             }
             
-            if (rc != 0)
-            {
-              
-                _push_segment_to_media_source_api(_mediaSourceBuffer, rc);		// the new MediaAPI allows to have more than one source buffer for the separate decoding chains (really nice) so we may support resolution switching in the future
-                this.mediaElementBuffered += 2;
+	    if (rc != 0)
+	    {
+		    if(_mediaSourceBuffer.seekFirst == true) {
+			    _mediaSourceBuffer.seekFirst = false;
+			    var to = object.drainTimeOffset();
+			    console.log("[live] seekFirst segment, drain time offset for mediaSource alignment: " + to + " / " + to/2);
+			    _push_segment_to_media_source_api(_mediaSourceBuffer, rc, to);
 
-            }
-            
+		    } else {
+
+			    _push_segment_to_media_source_api(_mediaSourceBuffer, rc);		// the new MediaAPI allows to have more than one source buffer for the separate decoding chains (really nice) so we may support resolution switching in the future                }
+	    }
+	    this.mediaElementBuffered += 2;
+
+            } 
             
             
             
@@ -119,11 +126,13 @@ function init_mediaSourceBuffer(bufferId, criticalLevel,buffersize, mediaAPI, vi
 		return this.state("seconds");
 	}
 	
-	mediaSourceBuffer.prototype.push = function(data,segmentDuration)
+	mediaSourceBuffer.prototype.push = function(data,segmentDuration, timeOffset)
 	{
 		
        		_mediaSourceBuffer.fillState.seconds += segmentDuration;
-        	_mediaSourceBuffer.add(data);
+		// If timeOffset is present store it also
+		if(timeOffset) {_mediaSourceBuffer.add(data,timeOffset); }
+        	else { _mediaSourceBuffer.add(data); }
 	
 	}	
 	
@@ -163,6 +172,7 @@ function init_mediaSourceBuffer(bufferId, criticalLevel,buffersize, mediaAPI, vi
 	_mediaSourceBuffer.id = bufferId;
    	_mediaSourceBuffer.playbackTimePlot = playbackTimePlot;
 	_mediaSourceBuffer.registerEventHandler("minimumLevel", _mediaSourceBuffer.signalRefill);
+	_mediaSourceBuffer.seekFirst = true;
 
 		
 	

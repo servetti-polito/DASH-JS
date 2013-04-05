@@ -46,8 +46,11 @@ function checkSourceError(videoTag)
 }
 
 
-function sourceBufferAppend(mediaSource, id, data)
+function sourceBufferAppend(mediaSource, id, data, tOffset)
 {
+    if(!mediaSource.sourceBuffers[id]) return;
+    // If we get the segment offset, align the mediasource (only required for the first segment)
+    if(tOffset) mediaSource.sourceBuffers[id].timestampOffset = tOffset;
     mediaSource.sourceBuffers[id].append(data);
 }
 
