@@ -162,5 +162,7 @@ baseBuffer.prototype.getTimeOffset = function()
     console.log("[live] Getting sideinfo for chunk: " + (this.buffer.first-1) % this.buffer.size + 
 		" timeOffset: " + this.buffer.sideinfo[(this.buffer.first-1) % this.buffer.size]);
     // FIXME: -1 required because we need the info of the last extracted chunk
-    return this.buffer.sideinfo[(this.buffer.first-1) % this.buffer.size];
+    var to = this.buffer.sideinfo[(this.buffer.first-1) % this.buffer.size];
+    if(to && to<0) return to;
+    else return 0;
 }

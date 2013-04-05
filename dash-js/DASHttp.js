@@ -73,7 +73,7 @@ function _fetch_segment(presentation, url, video, range, buffer)
                     if(presentation.curSegment >= presentation.segmentList.segments-1)
                         video.webkitSourceEndOfStream(HTMLMediaElement.EOS_NO_ERROR);
                 }
-                presentation.curSegment++;
+                //presentation.curSegment++;
 
             };
 	
@@ -115,7 +115,8 @@ function _fetch_segment_for_buffer(presentation, url, video, range, buffer)
         
 		// push the data into our buffer
 		// CHANGED: save also the segment timestamp
-		buffer.push(data, 2, -(presentation.curSegment-1)*2);
+		if(presentation.curSegment!=0) buffer.push(data, 2, -(presentation.curSegment-1)*2);
+		else buffer.push(data, 2, 0);
        		// buffer.push(data, 2);
 
             /* FIXME: in the live case we need an heuristic because the last segment is not known */
