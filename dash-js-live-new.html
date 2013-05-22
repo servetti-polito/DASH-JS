@@ -1,0 +1,100 @@
+<html>
+	<head>
+		<title>ITEC @ AAU | DASH-JS Showcase</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+
+<style>
+body {
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 14px;
+	line-height: 20px;
+	color: #333333;
+	margin: 50px;
+	margin-top: 50px;
+}
+#progressInfo { width: 100%; text-align: center; font-face: Arial;}
+#progressInfo p { margin-bottom: 3px; }
+progress { width: 500px; height: 20px; }
+</style>
+	<script src="dash-js/dashPlayerVars.js"></script>
+	<script src="dash-js/mediaSourceAPIAdaptation.js"></script>	
+	<script src="dash-js/fplot.js"></script>
+	<script src="dash-js/mpdParser.js"></script>	
+	<script src="dash-js/bandwidth.js"></script>
+	<script src="dash-js/adaptationlogic.js"></script>
+	<script src="dash-js/rate_measurement.js"></script>
+	<script src="dash-js/DASHttp.js"></script>
+	<script src="dash-js/basebuffer.js"></script>
+	<script src="dash-js/timeBuffer.js"></script>
+	<script src="dash-js/mediaSourceBuffer.js"></script>
+	<script src="dash-js/eventHandlers.js"></script>
+	<script src="dash-js/dash.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+	</head>
+	<body>
+	<h1> DASH-JS-LIVE Showcase</h1>
+	This showcase will only work using Google Chrome with MediaSource API enabled (use chrome://flags to enable the API). 
+<br><div id="progressInfo"></div><br>
+    <div>
+	<p>Copy the live stream MPD url <i>http://streaming.polito.it/dash-js-live/output/livestream.mpd</i> into the input field and press "Play".</p>
+        <label>MPD url: </label>
+        <input type="text" name="mpd" id="mpd"/>
+        <input type="submit" value="Play" onclick='loadmpd();'/><br/>
+        <p>
+	You can also test the player with other MPDs (beware of cross-site scripting limitation, start Chrome with --disable-web-security):
+	<ul>
+	<li>VoD from ITEC: http://www-itec.uni-klu.ac.at/dash/js/content/bunny_ibmff_360.mpd</li>
+	</ul>
+	</p>
+    </div>
+<p style="display: none">
+        Bandwidth in kbps (0=infinite[estimated]): <input type="text" id="bps" value="0"> <input type="button" value="Set" onClick="javascript:setBandwidth()"></p>
+	<p style="text-align: center">
+	<video autoplay ></video>
+	<!--canvas id="graph" width="600" height="500"></canvas-->
+    </p>
+		<script>
+ 		document.getElementById("bps").value = maxBandwidth/1024;
+		function setBandwidth()
+            {
+                
+                mybps = parseInt(document.getElementById("bps").value)*1024;
+                maxBandwidth = mybps;
+                
+            }
+        function loadmpd() {
+            video = document.querySelector("video");
+            dashPlayer = new DASHPlayer(video,document.getElementById("mpd").value);
+        }
+		
+		 
+$.ajaxSetup ({ cache: false }); // Disable caching of AJAX responses 
+
+// <div id="progressInfo"></div>
+
+function updateProgressInfo(el, url) {
+	$.getJSON( url, function (data) {
+		var str = "";
+		var liveStreamInfo = data; console.log(data);
+		str += '<p>Live streaming of ' + data.streamName + ' started at ' + data.streamStart + '.</p>';
+		str += '<progress max="' + data.totSegment + '" value="' + data.curSegment + '"></progress>';
+		el.html(str);
+	});
+}
+
+$(function() {
+
+	var progressInfo_el = $('#progressInfo');
+	updateProgressInfo($('#progressInfo'), 'http://streaming.polito.it/dash-js-live/livestream.json');
+	setInterval( function() { updateProgressInfo($('#progressInfo'), 'http://streaming.polito.it/dash-js-live/livestream.json') }, 2000 );
+
+});
+
+
+		
+	
+		
+		</script>
+	</body>
+</html>
