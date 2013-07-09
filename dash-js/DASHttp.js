@@ -38,7 +38,7 @@ function _push_segment_to_media_source_api(buffer, data, to)
 {
     console.log("DASH-JS client: appending data of length: " + data.length + " to the Media Source Buffer with id: "+ buffer.id);
     // If we get the time offset, pass it to align the mediasource
-    if(to) sourceBufferAppend(dashPlayer.MSE, buffer.id, data, to);
+    if(to != undefined) sourceBufferAppend(dashPlayer.MSE, buffer.id, data, to);
     else sourceBufferAppend(dashPlayer.MSE, buffer.id, data);
 }
 
