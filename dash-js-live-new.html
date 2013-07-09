@@ -39,7 +39,7 @@ progress { width: 500px; height: 20px; }
     <div>
 	<p>Copy the live stream MPD url <i>http://streaming.polito.it/dash-js-live/output/livestream.mpd</i> into the input field and press "Play".</p>
         <label>MPD url: </label>
-        <input type="text" name="mpd" id="mpd"/>
+        <input type="text" name="mpd" id="mpd" size="62" value='http://streaming.polito.it/dash-js-live/output/livestream.mpd' />
         <input type="submit" value="Play" onclick='loadmpd();'/><br/>
         <p>
 	You can also test the player with other MPDs (beware of cross-site scripting limitation, start Chrome with --disable-web-security):
@@ -79,6 +79,8 @@ function updateProgressInfo(el, url) {
 		var liveStreamInfo = data; console.log(data);
 		str += '<p>Live streaming of ' + data.streamName + ' started at ' + data.streamStart + '.</p>';
 		str += '<progress max="' + data.totSegment + '" value="' + data.curSegment + '"></progress>';
+		str += '<br>';
+		str += 'If you do not see the progress bar moving ahead, the live streaming is stopped.';
 		el.html(str);
 	});
 }
